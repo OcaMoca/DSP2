@@ -1,0 +1,3 @@
+﻿  QtMsBuild: could not locate qt.targets, qt.props; project may not build correctly.
+  PredictSVM.cpp
+  TrainSVM.vcxproj -> D:\RA92-2016\DSP2\postavka\ImageDSP\build\vs2015\ImageDSP\x64\Release\TrainSVM.exe

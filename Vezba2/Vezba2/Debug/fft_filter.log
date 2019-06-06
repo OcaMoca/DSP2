@@ -1,0 +1,9 @@
+﻿  obrada.cpp
+  fft_filter.cpp
+d:\ra92-2016\dsp2\vezba2\vezba2\fft_filter.cpp(46): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  c:\program files (x86)\windows kits\10\include\10.0.10240.0\ucrt\stdio.h(205): note: see declaration of 'fopen'
+d:\ra92-2016\dsp2\vezba2\vezba2\fft_filter.cpp(52): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  c:\program files (x86)\windows kits\10\include\10.0.10240.0\ucrt\stdio.h(205): note: see declaration of 'fopen'
+  Generating Code...
+  fft_filter.vcxproj -> D:\RA92-2016\DSP2\Vezba2\Vezba2\Debug\fft_filter.exe
+  fft_filter.vcxproj -> D:\RA92-2016\DSP2\Vezba2\Vezba2\Debug\fft_filter.pdb (Full PDB)

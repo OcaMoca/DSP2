@@ -1,0 +1,32 @@
+﻿  Rcc'ing imagedsp.qrc...
+RCC : warning : No resources in 'D:\RA92-2016\DSP2\Vezba11\ImageDSP\build\vs2015\ImageDSP\ImageDSP\imagedsp.qrc'.
+  
+  ColorSpaces.cpp
+  FeatureDetection.cpp
+  ImageFIlter.cpp
+  ImageProcessing.cpp
+  kMeans.cpp
+  main.cpp
+  Generating Code...
+  qrc_imagedsp.cpp
+ImageDSPLibDebug.lib(FeatureDraw.obj) : warning LNK4099: PDB 'ImageDSPLib.pdb' was not found with 'ImageDSPLibDebug.lib(FeatureDraw.obj)' or at 'D:\RA92-2016\DSP2\Vezba11\ImageDSP\build\vs2015\ImageDSP\x64\Debug\ImageDSPLib.pdb'; linking object as if no debug info
+ImageDSPLibDebug.lib(HoverEditTriggerListView.obj) : warning LNK4099: PDB 'ImageDSPLib.pdb' was not found with 'ImageDSPLibDebug.lib(HoverEditTriggerListView.obj)' or at 'D:\RA92-2016\DSP2\Vezba11\ImageDSP\build\vs2015\ImageDSP\x64\Debug\ImageDSPLib.pdb'; linking object as if no debug info
+ImageDSPLibDebug.lib(ImageViewer.obj) : warning LNK4099: PDB 'ImageDSPLib.pdb' was not found with 'ImageDSPLibDebug.lib(ImageViewer.obj)' or at 'D:\RA92-2016\DSP2\Vezba11\ImageDSP\build\vs2015\ImageDSP\x64\Debug\ImageDSPLib.pdb'; linking object as if no debug info
+ImageDSPLibDebug.lib(ItemWidget.obj) : warning LNK4099: PDB 'ImageDSPLib.pdb' was not found with 'ImageDSPLibDebug.lib(ItemWidget.obj)' or at 'D:\RA92-2016\DSP2\Vezba11\ImageDSP\build\vs2015\ImageDSP\x64\Debug\ImageDSPLib.pdb'; linking object as if no debug info
+ImageDSPLibDebug.lib(MainWindow.obj) : warning LNK4099: PDB 'ImageDSPLib.pdb' was not found with 'ImageDSPLibDebug.lib(MainWindow.obj)' or at 'D:\RA92-2016\DSP2\Vezba11\ImageDSP\build\vs2015\ImageDSP\x64\Debug\ImageDSPLib.pdb'; linking object as if no debug info
+ImageDSPLibDebug.lib(ezsift.obj) : warning LNK4099: PDB 'ImageDSPLib.pdb' was not found with 'ImageDSPLibDebug.lib(ezsift.obj)' or at 'D:\RA92-2016\DSP2\Vezba11\ImageDSP\build\vs2015\ImageDSP\x64\Debug\ImageDSPLib.pdb'; linking object as if no debug info
+ImageDSPLibDebug.lib(SIFTLib.obj) : warning LNK4099: PDB 'ImageDSPLib.pdb' was not found with 'ImageDSPLibDebug.lib(SIFTLib.obj)' or at 'D:\RA92-2016\DSP2\Vezba11\ImageDSP\build\vs2015\ImageDSP\x64\Debug\ImageDSPLib.pdb'; linking object as if no debug info
+ImageDSPLibDebug.lib(ParamItem.obj) : warning LNK4099: PDB 'ImageDSPLib.pdb' was not found with 'ImageDSPLibDebug.lib(ParamItem.obj)' or at 'D:\RA92-2016\DSP2\Vezba11\ImageDSP\build\vs2015\ImageDSP\x64\Debug\ImageDSPLib.pdb'; linking object as if no debug info
+ImageDSPLibDebug.lib(Project.obj) : warning LNK4099: PDB 'ImageDSPLib.pdb' was not found with 'ImageDSPLibDebug.lib(Project.obj)' or at 'D:\RA92-2016\DSP2\Vezba11\ImageDSP\build\vs2015\ImageDSP\x64\Debug\ImageDSPLib.pdb'; linking object as if no debug info
+ImageDSPLibDebug.lib(TableModel.obj) : warning LNK4099: PDB 'ImageDSPLib.pdb' was not found with 'ImageDSPLibDebug.lib(TableModel.obj)' or at 'D:\RA92-2016\DSP2\Vezba11\ImageDSP\build\vs2015\ImageDSP\x64\Debug\ImageDSPLib.pdb'; linking object as if no debug info
+ImageDSPLibDebug.lib(UniversalItemDelegate.obj) : warning LNK4099: PDB 'ImageDSPLib.pdb' was not found with 'ImageDSPLibDebug.lib(UniversalItemDelegate.obj)' or at 'D:\RA92-2016\DSP2\Vezba11\ImageDSP\build\vs2015\ImageDSP\x64\Debug\ImageDSPLib.pdb'; linking object as if no debug info
+ImageDSPLibDebug.lib(moc_HoverEditTriggerListView.obj) : warning LNK4099: PDB 'ImageDSPLib.pdb' was not found with 'ImageDSPLibDebug.lib(moc_HoverEditTriggerListView.obj)' or at 'D:\RA92-2016\DSP2\Vezba11\ImageDSP\build\vs2015\ImageDSP\x64\Debug\ImageDSPLib.pdb'; linking object as if no debug info
+ImageDSPLibDebug.lib(moc_ImageViewer.obj) : warning LNK4099: PDB 'ImageDSPLib.pdb' was not found with 'ImageDSPLibDebug.lib(moc_ImageViewer.obj)' or at 'D:\RA92-2016\DSP2\Vezba11\ImageDSP\build\vs2015\ImageDSP\x64\Debug\ImageDSPLib.pdb'; linking object as if no debug info
+ImageDSPLibDebug.lib(moc_ItemWidget.obj) : warning LNK4099: PDB 'ImageDSPLib.pdb' was not found with 'ImageDSPLibDebug.lib(moc_ItemWidget.obj)' or at 'D:\RA92-2016\DSP2\Vezba11\ImageDSP\build\vs2015\ImageDSP\x64\Debug\ImageDSPLib.pdb'; linking object as if no debug info
+ImageDSPLibDebug.lib(moc_MainWindow.obj) : warning LNK4099: PDB 'ImageDSPLib.pdb' was not found with 'ImageDSPLibDebug.lib(moc_MainWindow.obj)' or at 'D:\RA92-2016\DSP2\Vezba11\ImageDSP\build\vs2015\ImageDSP\x64\Debug\ImageDSPLib.pdb'; linking object as if no debug info
+ImageDSPLibDebug.lib(moc_ParamItem.obj) : warning LNK4099: PDB 'ImageDSPLib.pdb' was not found with 'ImageDSPLibDebug.lib(moc_ParamItem.obj)' or at 'D:\RA92-2016\DSP2\Vezba11\ImageDSP\build\vs2015\ImageDSP\x64\Debug\ImageDSPLib.pdb'; linking object as if no debug info
+ImageDSPLibDebug.lib(moc_Project.obj) : warning LNK4099: PDB 'ImageDSPLib.pdb' was not found with 'ImageDSPLibDebug.lib(moc_Project.obj)' or at 'D:\RA92-2016\DSP2\Vezba11\ImageDSP\build\vs2015\ImageDSP\x64\Debug\ImageDSPLib.pdb'; linking object as if no debug info
+ImageDSPLibDebug.lib(moc_TableModel.obj) : warning LNK4099: PDB 'ImageDSPLib.pdb' was not found with 'ImageDSPLibDebug.lib(moc_TableModel.obj)' or at 'D:\RA92-2016\DSP2\Vezba11\ImageDSP\build\vs2015\ImageDSP\x64\Debug\ImageDSPLib.pdb'; linking object as if no debug info
+ImageDSPLibDebug.lib(moc_UniversalItemDelegate.obj) : warning LNK4099: PDB 'ImageDSPLib.pdb' was not found with 'ImageDSPLibDebug.lib(moc_UniversalItemDelegate.obj)' or at 'D:\RA92-2016\DSP2\Vezba11\ImageDSP\build\vs2015\ImageDSP\x64\Debug\ImageDSPLib.pdb'; linking object as if no debug info
+  ImageDSP.vcxproj -> D:\RA92-2016\DSP2\Vezba11\ImageDSP\build\vs2015\ImageDSP\x64\Debug\ImageDSP.exe
+  ImageDSP.vcxproj -> D:\RA92-2016\DSP2\Vezba11\ImageDSP\build\vs2015\ImageDSP\x64\Debug\ImageDSP.pdb (Full PDB)

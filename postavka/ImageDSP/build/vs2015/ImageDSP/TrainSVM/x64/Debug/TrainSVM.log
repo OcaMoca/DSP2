@@ -1,0 +1,20 @@
+﻿  QtMsBuild: could not locate qt.targets, qt.props; project may not build correctly.
+  Rcc'ing ..\..\ImageDSP\ImageDSP\imagedsp.qrc...
+RCC : warning : No resources in 'D:\RA92-2016\DSP2\postavka\ImageDSP\build\vs2015\ImageDSP\ImageDSP\imagedsp.qrc'.
+  
+  svm.cpp
+  BoW.cpp
+  ColorSpaces.cpp
+  FeatureDetection.cpp
+  ImageFIlter.cpp
+  kMeans.cpp
+  PredictSVM.cpp
+  SVMConsoleMain.cpp
+  TrainSVM.cpp
+d:\ra92-2016\dsp2\postavka\imagedsp\src\predictsvm.cpp(71): warning C4700: uninitialized local variable 'res' used
+  qrc_imagedsp.cpp
+ImageDSPLibDebug.lib(FeatureDraw.obj) : warning LNK4099: PDB 'ImageDSPLib.pdb' was not found with 'ImageDSPLibDebug.lib(FeatureDraw.obj)' or at 'D:\RA92-2016\DSP2\postavka\ImageDSP\build\vs2015\ImageDSP\x64\Debug\ImageDSPLib.pdb'; linking object as if no debug info
+ImageDSPLibDebug.lib(ezsift.obj) : warning LNK4099: PDB 'ImageDSPLib.pdb' was not found with 'ImageDSPLibDebug.lib(ezsift.obj)' or at 'D:\RA92-2016\DSP2\postavka\ImageDSP\build\vs2015\ImageDSP\x64\Debug\ImageDSPLib.pdb'; linking object as if no debug info
+ImageDSPLibDebug.lib(SIFTLib.obj) : warning LNK4099: PDB 'ImageDSPLib.pdb' was not found with 'ImageDSPLibDebug.lib(SIFTLib.obj)' or at 'D:\RA92-2016\DSP2\postavka\ImageDSP\build\vs2015\ImageDSP\x64\Debug\ImageDSPLib.pdb'; linking object as if no debug info
+  TrainSVM.vcxproj -> D:\RA92-2016\DSP2\postavka\ImageDSP\build\vs2015\ImageDSP\x64\Debug\TrainSVM.exe
+  TrainSVM.vcxproj -> D:\RA92-2016\DSP2\postavka\ImageDSP\build\vs2015\ImageDSP\x64\Debug\TrainSVM.pdb (Full PDB)

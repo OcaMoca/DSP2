@@ -1,0 +1,12 @@
+﻿  Rcc'ing imagedsp.qrc...
+RCC : warning : No resources in 'D:\RA92-2016\DSP2\Vezba11\ImageDSP\build\vs2015\ImageDSP\ImageDSP\imagedsp.qrc'.
+  
+  ColorSpaces.cpp
+  FeatureDetection.cpp
+  ImageFIlter.cpp
+  ImageProcessing.cpp
+  kMeans.cpp
+  main.cpp
+  Generating Code...
+  qrc_imagedsp.cpp
+  ImageDSP.vcxproj -> D:\RA92-2016\DSP2\Vezba11\ImageDSP\build\vs2015\ImageDSP\x64\Release\ImageDSP.exe

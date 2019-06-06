@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE imgdsp>
+<imgdsp>
+    <programs>
+        <program name="SVM Classification">
+            <params>
+            </params>
+        </program>
+    </programs>
+    <in_imgs>
+		<in_img file_name="1.jpg"/>
+		<in_img file_name="2.jpg"/>
+		<in_img file_name="3.jpg"/>
+		<in_img file_name="4.jpg"/>
+		<in_img file_name="5.jpg"/>
+		<in_img file_name="6.jpg"/>
+		<in_img file_name="7.jpg"/>
+		<in_img file_name="8.jpg"/>
+		<in_img file_name="9.jpg"/>
+		<in_img file_name="10.jpg"/>
+		<in_img file_name="11.jpg"/>
+		<in_img file_name="12.jpg"/>
+    </in_imgs>
+    <out_imgs>
+        <out_img file_name="processed_img.bmp"/>
+    </out_imgs>
+</imgdsp>
+
+
+
+
+
+
+

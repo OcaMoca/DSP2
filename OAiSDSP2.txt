@@ -1,0 +1,1954 @@
+****************************************************
+****************************************************
+----------------------VEZBA4----------------------**
+---Prostori boja--------------------------------- **
+****************************************************
+****************************************************
+{RGBtoYUV444, procesing_YUV444, RGBtoYUV422, procesing_YUV422, RGBtoYUV420, procesing_YUV420, decimate_Y}
+
+
+**
+~ rgbImg – ulazna slika u RGB formatu
+~ x – hotizontalna dimenzija slike u pikselima 
+~ y – vertikalna dimenzija slike u pikselima
+~ Y_buff, U_buff i V_buff – Izlazni nizovi u koje je potrebno smestiti Y;
+  U i V komponentu svakog piksela. Svi nizovi su dimenzije x*y
+**
+
+void RGBtoYUV444(const uchar rgbImg[], int x, int y, uchar Y_buff[], char U_buff[], char V_buff[]) 
+{
+	uchar R, G, B;
+	for(int i = 0; i<x; i++)
+	{
+		for(int j = 0; j<y; j+=1)
+		{
+			R = rgbImg[j*3*x+i*3];
+			G = rgbImg[j*3*x+i*3 + 1];
+			B = rgbImg[j*3*x+i*3 + 2];
+
+			Y_buff[j*x+i] =  0.299*R + 0.587*G + 0.114*B;
+			U_buff[j*x+i] =  - 0.14713*R - 0.28886*G + 0.436*B;
+			V_buff[j*x+i] =  R*0.615 - 0.51499*G - 0.10001*B;
+		}
+	}
+}
+
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+**
+vrsi se skalarno mnozenje svake vrednosti matrice Y_BUFF sa Y konstantom, U_BUFF sa konstantom
+U konst i V_BUFF sa V konst
+**
+
+
+void procesing_YUV444(uchar Y_buff[], char U_buff[], char V_buff[], int x, int y, double Y, double U, double V)
+{
+	for(int i = 0; i<x; i++)
+	{
+		for(int j = 0; j<y; j++)
+		{
+			Y_buff[j*x+i] *= Y; 
+			U_buff[j*x+i] *= U; 
+			V_buff[j*x+i] *= V; 
+		}
+	}
+
+}
+
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+**
+U i V komponentu racunamo kao aritmeticku sredinu U iV vrednosti za dva susedna piksela po 
+horizontalnoj osi, s obzirom da jedna U iv komponenta oslikava dva susenda piksela
+**
+
+void RGBtoYUV422(const uchar rgbImg[], int x, int y, uchar Y_buff[], char U_buff[], char V_buff[]) 
+{
+	uchar R, G, B;
+	for(int i = 0; i<x; i+=2)
+	{
+		for(int j = 0; j<y; j++)
+		{
+			R = rgbImg[j*3*x+i*3];
+			G = rgbImg[j*3*x+i*3 + 1];
+			B = rgbImg[j*3*x+i*3 + 2];
+
+			Y_buff[j*x+i] =  0.299*R + 0.587*G + 0.114*B;
+			U_buff[j*x/2+i/2] =  (- 0.14713*R - 0.28886*G + 0.436*B)/2;
+			V_buff[j*x/2+i/2] =  (R*0.615 - 0.51499*G - 0.10001*B)/2;
+
+			R = rgbImg[j*3*x+(i+1)*3];
+			G = rgbImg[j*3*x+(i+1)*3 + 1];
+			B = rgbImg[j*3*x+(i+1)*3 + 2];
+
+			Y_buff[j*x+(i+1)] =  0.299*R + 0.587*G + 0.114*B;
+			U_buff[j*x/2+i/2] +=  (- 0.14713*R - 0.28886*G + 0.436*B)/2;
+			V_buff[j*x/2+i/2] +=  (R*0.615 - 0.51499*G - 0.10001*B)/2;
+		}
+	}
+}
+
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+void procesing_YUV422(uchar Y_buff[], char U_buff[], char V_buff[], int x, int y, double Y, double U, double V)
+{
+	for(int i = 0; i<x; i+=2)
+	{
+		for(int j = 0; j<y; j++)
+		{
+			Y_buff[j*x+i] *= Y; 
+			Y_buff[j*x+i+1] *= Y; 
+			U_buff[j*x/2+i/2] *= U; 
+			V_buff[j*x/2+i/2] *= V; 
+		}
+	}
+
+}
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+** 
+na izlazu se dobijaju U i V komponente dimenzija i/2 * y/2
+**
+
+void RGBtoYUV420(const uchar rgbImg[], int x, int y, uchar Y_buff[], char U_buff[], char V_buff[]) 
+{
+	uchar R, G, B;
+	double U, V;
+	for(int i = 0; i<x; i+=2)
+	{
+		for(int j = 0; j<y; j+=2)
+		{	
+			R = rgbImg[j*3*x+i*3];
+			G = rgbImg[j*3*x+i*3 + 1];
+			B = rgbImg[j*3*x+i*3 + 2];
+
+			//Y_buff[j*x+i] =  0.299*R + 0.587*G + 0.114*B;
+			U =  (- 0.14713*R - 0.28886*G + 0.436*B);
+			V =  (R*0.615 - 0.51499*G - 0.10001*B);
+
+			R = rgbImg[j*3*x+(i+1)*3];
+			G = rgbImg[j*3*x+(i+1)*3 + 1];
+			B = rgbImg[j*3*x+(i+1)*3 + 2];
+
+			//Y_buff[j*x+(i+1)] =  0.299*R + 0.587*G + 0.114*B;
+			U +=  (- 0.14713*R - 0.28886*G + 0.436*B);
+			V +=  (R*0.615 - 0.51499*G - 0.10001*B);
+
+			R = rgbImg[(j+1)*3*x+i*3];
+			G = rgbImg[(j+1)*3*x+i*3 + 1];
+			B = rgbImg[(j+1)*3*x+i*3 + 2];
+
+			//Y_buff[(j+1)*x+i] =  0.299*R + 0.587*G + 0.114*B;
+			U +=  (- 0.14713*R - 0.28886*G + 0.436*B);
+			V +=  (R*0.615 - 0.51499*G - 0.10001*B);
+
+			R = rgbImg[(j+1)*3*x+(i+1)*3];
+			G = rgbImg[(j+1)*3*x+(i+1)*3 + 1];
+			B = rgbImg[(j+1)*3*x+(i+1)*3 + 2];
+
+			//Y_buff[(j+1)*x+(i+1)] =  0.299*R + 0.587*G + 0.114*B;
+			U +=  (- 0.14713*R - 0.28886*G + 0.436*B);
+			V +=  (R*0.615 - 0.51499*G - 0.10001*B);
+
+			U_buff[(j/2)*x/2+i/2] =  U/4;
+			V_buff[(j/2)*x/2+i/2] =  V/4;
+		}
+	}
+}
+
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+void procesing_YUV420(uchar Y_buff[], char U_buff[], char V_buff[], int x, int y, double Y, double U, double V)
+{
+	for(int i = 0; i<x; i+=2)
+	{
+		for(int j = 0; j<y; j+=2)
+		{
+			Y_buff[j*x+i] *= Y; 
+			Y_buff[j*x+i+1] *= Y; 
+			Y_buff[(j+1)*x+i] *= Y; 
+			Y_buff[(j+1)*x+i+1] *= Y; 
+
+			U_buff[j/2*x/2+i/2] *= U; 
+			V_buff[j/2*x/2+i/2] *= V; 
+		}
+	}
+
+}
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+**
+vrši decimaciju Y komponente na isti naèin na koji je to vršeno kod RGBtoYUV420.
+Za svaki blok od 2x2 piksela vrednost prvog dodeljujemo ostalima
+**
+
+void decimate_Y(uchar Y_buff[], int x, int y)
+{
+	uchar YY;
+	for(int i = 0; i<x; i+=2)
+	{
+		for(int j = 0; j<y; j+=2)
+		{
+			YY = ((int)Y_buff[j*x+i] + Y_buff[j*x+i] + Y_buff[(j+1)*x+i] + Y_buff[j*x+i+1] + Y_buff[(j+1)*x+i+1])>>2;
+			Y_buff[j*x+i] = YY;
+			Y_buff[(j+1)*x+i] = YY;
+			Y_buff[j*x+i+1] = YY;
+			Y_buff[(j+1)*x+i+1] = YY;
+		}
+	}
+
+}
+
+
+
+
+****************************************************
+****************************************************
+----------------------VEZBA5----------------------**
+---2D spektar i spektralna dekompozicija slike--- **
+****************************************************
+****************************************************
+
+{performDCT, performDCTandIDCT, performMaskDCTCoeffs, performDCTQuantization}
+
+
+**
+U okviru f-je izvrseno je prosirivanje slike, generisanje transformacione matrice za zadatu velicinu bloka,
+podela slike na blokove i poziv DCT transformacije nad blokovima. Vrednosti DCT koef su skalirani
+i smesteni u Y_BUFF[] kako bi bili iscrtani nakon obrade.
+
+~ Y_buff – ulazna slika
+~ xSize – horizontalna dimenzija slike u pikselima
+~ ySize – vertikalna dimenzija slike u pikselima
+~ N – velièina bloka DCT transformacije
+
+**
+
+
+void performDCT(uchar Y_buff[], int xSize, int ySize, int N)
+{
+	/* Create NxN buffer for one input block */
+	uchar* inBlock = new uchar[N*N];
+
+	/* Generate DCT kernel */
+	double* DCTKernel = new double[N*N];
+	GenerateDCTmatrix(DCTKernel, N);
+
+	/* Create buffer for DCT coefficients */
+	short* dctCoeffs = new short[N*N];
+
+	/* Extend image borders */
+	int xSize2, ySize2;
+	uchar* Y_buff2;
+	extendBorders(Y_buff, xSize , ySize, N, &Y_buff2, &xSize2, &ySize2);
+
+	for (int y = 0; y < ySize2/N; y++)
+	{
+		for (int x = 0; x < xSize2/N; x++)
+		{	
+
+			/* Fill input block buffer */
+			for (int j=0; j<N; j++)
+			{
+				for (int i=0; i<N; i++)
+				{
+					inBlock[j*N+i] = Y_buff2[(N*y+j)*(xSize2)+N*x+i];
+				}
+			}
+
+			/* Invoke DCT */
+			DCT(inBlock, dctCoeffs, N, DCTKernel);	
+
+			/* Prepere DCT coefficients for drawing and put them in Y_buff */
+			for(int i = 0; i < N*N; i++)
+			{
+				dctCoeffs[i] = abs(dctCoeffs[i]);
+				if(dctCoeffs[i] < 0)
+				{
+					dctCoeffs[i] = 0;
+				}
+				else if(dctCoeffs[i] > 255)
+				{
+					dctCoeffs[i] = 255;
+				}
+
+				inBlock[i] = dctCoeffs[i];
+			}
+
+			/* Write output values to output image */
+			for (int j=0; j<N; j++)
+			{
+				for (int i=0; i<N; i++)
+				{
+					Y_buff2[(N*y+j)*(xSize2)+N*x+i] = inBlock[j*N+i];
+				}
+			}
+		}
+	}
+
+	cropImage(Y_buff2, xSize2, ySize2, Y_buff, xSize, ySize);
+
+	/* Delete used memory buffers coefficients */
+	delete[] dctCoeffs;
+	delete[] inBlock;
+	delete[] DCTKernel;
+	delete[] Y_buff2;
+}
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+**
+implementirano je vrsenje DCT transformacije nad ulaznom slikom kao u prethodnoj f-ji a potom odmah i 
+inverzna IDCT transformacija
+**
+
+
+void performDCTandIDCT(uchar* Y_buff, int xSize, int ySize, int N)
+{
+	/* Create NxN buffer for one input block */
+	uchar* inBlock = new uchar[N*N];
+
+	/* Generate DCT kernel */
+	double* DCTKernel = new double[N*N];
+	GenerateDCTmatrix(DCTKernel, N);
+
+	/* Create buffer for DCT coefficients */
+	short* dctCoeffs = new short[N*N];
+
+	/* Extend image borders */
+	int xSize2, ySize2;
+	uchar* Y_buff2;
+	extendBorders(Y_buff, xSize , ySize, N, &Y_buff2, &xSize2, &ySize2);
+
+	for (int y = 0; y < ySize2/N; y++)
+	{
+		for (int x = 0; x < xSize2/N; x++)
+		{	
+
+			/* Fill input block buffer */
+			for (int j=0; j<N; j++)
+			{
+				for (int i=0; i<N; i++)
+				{
+					inBlock[j*N+i] = Y_buff2[(N*y+j)*(xSize2)+N*x+i];
+				}
+			}
+
+			/* Invoke DCT */
+			DCT(inBlock, dctCoeffs, N, DCTKernel);	
+
+
+
+			/* Invoke IDCT */
+			IDCT(dctCoeffs, inBlock, N, DCTKernel);	
+
+			/* Write output values to output image */
+			for (int j=0; j<N; j++)
+			{
+				for (int i=0; i<N; i++)
+				{
+					Y_buff2[(N*y+j)*(xSize2)+N*x+i] = inBlock[j*N+i];
+				}
+			}
+		}
+	}
+
+	cropImage(Y_buff2, xSize2, ySize2, Y_buff, xSize, ySize);
+
+	/* Delete used memory buffers coefficients */
+	delete[] dctCoeffs;
+	delete[] inBlock;
+	delete[] DCTKernel;
+	delete[] Y_buff2;
+}
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+**
+vrsi poziv DCT i IDCT transformacije performDCTandIDCT,ali izmedju poziva ove dve transformacije 
+nad blokom DCT koef velicine NxN izvrsava maskiranje BxB u gornjem levom uglu, 
+tako da sve ostale vrednosti u bloku budu 0
+**
+
+void performMaskDCTCoeffs(uchar input[], int xSize, int ySize, int N, int B)
+{
+	//TO DO
+	/* Create NxN buffer for one input block */
+	uchar* inBlock = new uchar[N*N];
+
+	/* Generate DCT kernel */
+	double* DCTKernel = new double[N*N];
+	GenerateDCTmatrix(DCTKernel, N);
+
+	/* Create buffer for DCT coefficients */
+	short* dctCoeffs = new short[N*N];
+
+	/* Extend image borders */
+	int xSize2, ySize2;
+	uchar* Y_buff2;
+	extendBorders(input, xSize, ySize, N, &Y_buff2, &xSize2, &ySize2);
+
+	for (int y = 0; y < ySize2 / N; y++)
+	{
+		for (int x = 0; x < xSize2 / N; x++)
+		{
+
+			/* Fill input block buffer */
+			for (int j = 0; j<N; j++)
+			{
+				for (int i = 0; i<N; i++)
+				{
+					inBlock[j*N + i] = Y_buff2[(N*y + j)*(xSize2)+N*x + i];
+				}
+			}
+
+			/* Invoke DCT */
+			DCT(inBlock, dctCoeffs, N, DCTKernel);
+
+			for (int j = B; j < N; j++)
+			{
+				for (int i = B; i < N; i++)
+				{
+					dctCoeffs[j*N + i] = 0;
+				}
+			}
+
+			for (int j = 0; j < B; j++)
+			{
+				for (int i = B; i < N; i++)
+				{
+					dctCoeffs[j*N + i] = 0;
+				}
+			}
+
+			for (int j = B; j < N; j++)
+			{
+				for (int i = 0; i < B; i++)
+				{
+					dctCoeffs[j*N + i] = 0;
+				}
+			}
+
+			/* Invoke IDCT */
+			IDCT(dctCoeffs, inBlock, N, DCTKernel);
+
+			/* Write output values to output image */
+			for (int j = 0; j<N; j++)
+			{
+				for (int i = 0; i<N; i++)
+				{
+					Y_buff2[(N*y + j)*(xSize2)+N*x + i] = inBlock[j*N + i];
+				}
+			}
+		}
+	}
+
+	cropImage(Y_buff2, xSize2, ySize2, input, xSize, ySize);
+
+	/* Delete used memory buffers coefficients */
+	delete[] dctCoeffs;
+	delete[] inBlock;
+	delete[] DCTKernel;
+	delete[] Y_buff2;
+}
+
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+/* 8x8 Quantization matrix */
+uchar quantizationMatrix[64] = 
+{
+    16, 11, 10, 16, 24, 40, 51, 61,
+    12, 12, 14, 19, 26, 58, 60, 55,
+    14, 13, 16, 24, 40, 57, 69, 56,
+    14, 17, 22, 29, 51, 87, 80, 62,
+    18, 22, 37, 56, 68, 109, 103, 77,
+    24, 35, 55, 64, 81, 104, 113, 92,
+    49, 64, 78, 87, 103, 121, 120, 101,
+    72, 92, 95, 98, 112, 100, 103, 99
+};
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+**
+vrsi poziv DCT i IDCT, izmedju poziva DCT i IDCT izvrsava kvantizaciju DCT koef upotrebom kvantizacione tabele
+**
+
+
+
+void performDCTQuantization(uchar input[], int xSize, int ySize)
+{
+	//TO DO
+	int N = 8;
+	uchar* copy = new uchar[xSize*ySize];
+
+	for (int i = 0; i < xSize*ySize; i++)
+	{
+		copy[i] = input[i];
+	}
+
+	/* Create NxN buffer for one input block */
+	uchar* inBlock = new uchar[N*N];
+
+	/* Generate DCT kernel */
+	double* DCTKernel = new double[N*N];
+	GenerateDCTmatrix(DCTKernel, N);
+
+	/* Create buffer for DCT coefficients */
+	short* dctCoeffs = new short[N*N];
+
+	/* Extend image borders */
+	int xSize2, ySize2;
+	uchar* Y_buff2;
+	extendBorders(input, xSize, ySize, N, &Y_buff2, &xSize2, &ySize2);
+
+	for (int y = 0; y < ySize2 / N; y++)
+	{
+		for (int x = 0; x < xSize2 / N; x++)
+		{
+
+			/* Fill input block buffer */
+			for (int j = 0; j<N; j++)
+			{
+				for (int i = 0; i<N; i++)
+				{
+					inBlock[j*N + i] = Y_buff2[(N*y + j)*(xSize2)+N*x + i];
+				}
+			}
+
+			/* Invoke DCT */
+			DCT(inBlock, dctCoeffs, N, DCTKernel);
+
+			for (int j = 0; j < N; j++) 
+			{ 
+				for (int i = 0; i < N; i++) 
+				{ 
+					dctCoeffs[j*N + i] = round(dctCoeffs[j*N + i] / quantizationMatrix[j*N + i])*quantizationMatrix[j*N + i];
+				} 
+			}
+
+			/* Invoke IDCT */
+			IDCT(dctCoeffs, inBlock, N, DCTKernel);
+
+			/* Write output values to output image */
+			for (int j = 0; j<N; j++)
+			{
+				for (int i = 0; i<N; i++)
+				{
+					Y_buff2[(N*y + j)*(xSize2)+N*x + i] = inBlock[j*N + i];
+				}
+			}
+		}
+	}
+
+	cropImage(Y_buff2, xSize2, ySize2, input, xSize, ySize);
+
+	float MSE = 0;
+	for (int j = 0; j < ySize; j++)
+	{
+		for (int i = 0; i < xSize; i++)
+		{
+			MSE += (input[j*N + i] - copy[j*N + i])*(input[j*N + i] - copy[j*N + i]);
+		}
+	}
+	MSE /= xSize*ySize;
+
+	/* Delete used memory buffers coefficients */
+	delete[] dctCoeffs;
+	delete[] inBlock;
+	delete[] DCTKernel;
+	delete[] Y_buff2;
+}
+
+****************************************************
+****************************************************
+----------------------VEZBA6----------------------**
+---2D konvolucija i detekcija ivica u slici-------** 
+****************************************************
+****************************************************
+
+
+{convolve2D , extendBorders, performNFFilter, performVFFilter, performSuccessiveNFFilter, 
+performSobelEdgeDetection, performNFplusSobelEdgeDetection}
+
+
+
+**
+vrsi diskretnu konvoluciju nad ulaznom slikom koristeci prosledjeni filter
+**
+
+
+void convolve2D (uchar Y_buff[], int xSize, int ySize, double filterCoeff[], int N)
+{
+	//TO DO
+	int delta = (N - 1) / 2;
+	
+	int newXSize = xSize + 2 * delta;
+	int newYSize = ySize + 2 * delta;
+
+	uchar* newY_buff = new uchar[newXSize*newYSize];
+
+	extendBorders(Y_buff, xSize, ySize, newY_buff, delta);
+
+	for (int i = 0; i < xSize; i++) {
+		for (int j = 0; j < ySize; j++) {
+			double accum = 0;
+			for (int m = 0; m < N; m++) {
+				for (int n = 0; n < N; n++) {
+					accum += newY_buff[(j + n)*newXSize + i + m] * filterCoeff[(N - n)*N - m - 1];
+				}
+			}
+
+			if (accum > 255.0)
+				Y_buff[j*xSize + i] = 255;
+			else if (accum < 0.0)
+				Y_buff[j*xSize + i] = 0;
+			else
+				Y_buff[j*xSize + i] = floor(accum + 0.5);
+		}
+	}
+}
+
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+**
+prosirujemo sliku za polovinu velicine kernela filtra sa svake strane da ne bi doslo do 
+citanja ven opsega kada se vrsi filtriranje ivicnih tacaka. Dodati pikseli se popunjavaju nulama
+ili se vrsi kopiranje ivicnih vrednosti originalne slike
+**
+
+void extendBorders(uchar input[], int xSize, int ySize, uchar output[], int delta)
+{
+	//TO DO
+	int newXSize = xSize + 2 * delta;
+	int newYSize = ySize + 2 * delta; 
+
+	for (int i = 0; i < xSize; i++) {
+		for (int j = 0; j < ySize; j++) {
+			output[(j + delta)*newXSize + i + delta] = input[j*xSize + i];
+		}
+	}
+
+	for (int i = 0; i < delta; i++) {
+		memcpy(&output[i*newXSize + delta], &input[0], xSize);
+		memcpy(&output[(ySize + delta + i)*newXSize + delta], &input[(ySize - 1)*xSize], xSize);
+	}
+
+	for (int i = 0; i < newYSize; i++) {
+		memset(&output[i*newXSize], output[i*newXSize + delta], delta);
+		memset(&output[i*newXSize + delta + xSize], output[i*newXSize + xSize + delta - 1], delta);
+	}
+}
+
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+**
+vrsi filtriranje slike upotrebom datog kernela NF filtra koristeci diskretnu konvoluciju
+**
+
+
+void performNFFilter (uchar input[], int xSize, int ySize)
+{
+	double filterCoeff[] = { 1.0 / 9,1.0 / 9,1.0 / 9,1.0 / 9 ,1.0 / 9 ,1.0 / 9 ,1.0 / 9 ,1.0 / 9 ,1.0 / 9 };
+	convolve2D(input, xSize, ySize, filterCoeff, 3);
+	//TO DO
+}
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+**
+vrsi filtriranje slike upotrebom datog kernela VF filtra koristeci diskretnu konvoluciju
+**
+
+void performVFFilter (uchar input[], int xSize, int ySize)
+{
+	double filterCoeff[] = { 0,-1,0,-1,4,-1,0,-1,0 };
+	convolve2D(input, xSize, ySize, filterCoeff, 3);
+	//TO DO
+}
+
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+**
+vrsi sukcesivno filtriranje slike upotrebom datog kernela NF filtra koristeci diskretnu konvoluciju,
+broj filtriranja zadatat je parametrom stages. Nakon svake iteracije dobija se zamucenija slika, odnosno
+vise komponenti visokoh frekvencija je prisutno iz slike(sko koristimo NF filter)
+**
+
+
+void performSuccessiveNFFilter (uchar input[], int xSize, int ySize, int stages)
+{
+	//TO DO
+	for (int i = 0; i < stages; i++) {
+		performNFFilter(input, xSize, ySize);
+	}
+}
+
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+**
+vrsi detekcij ivica upotrebom Sobel operatora. Granicna vrednost data je parametrom treshold.
+Vrednot 1 oznacava tacku na ivici a vrednost 0 tacku koja nije na ivici. koristi se gradijent(prvog reda)
+za meru da li neka tacka pripada ivici ili ne. U tome konceptu prvi izvod po x-osi predstavlja 
+meru za vertikalnu ivicu a izvod po y-osi predstavlja meru za horizontalnu ivicu. Rezultat filtriranjem 
+horizontalnim Sobel-operatorom jeste horizontalni gradijent, a vertikalnim vertikalni gradijent. 
+Zato se za detekciju ivica u bilo kom pravcu koristi Euklidska mera gradijenta kao globalni gradijent, 
+koji se izraèunava na osnovu horizontalnog i vertikalnog gradijenta upotrebom jednacine. Vrednosti globalnog 
+gradijenta su u opsegu od 0 do ?2. Na kraju, za svaku taèku ispituje se da li binarni globalni gradijent 
+prelazi odreðenu graniènu vrednost.
+**
+
+
+void performSobelEdgeDetection(uchar input[], int xSize, int ySize, uchar threshold)
+{
+	//TO DO
+	uchar* copyInput = new uchar[xSize*ySize];
+
+	for (int i = 0; i < xSize; i++) {
+		for (int j = 0; j < ySize; j++) {
+			copyInput[j*xSize + i] = input[j*xSize + i];
+		}
+	}
+
+	double filterCoeff1[] = { -1.0 / 4,0,1.0 / 4,-2.0 / 4,0,2.0 / 4,-1.0 / 4,0,1.0 / 4 };
+	double filterCoeff2[] = { -1.0 / 4,-2.0 / 4,-1.0 / 4,0,0,0,1.0 / 4,2.0 / 4,1.0 / 4 };
+
+	convolve2D(input, xSize, ySize, filterCoeff1, 3);
+	convolve2D(copyInput, xSize, ySize, filterCoeff2, 3);
+
+	for (int i = 0; i < xSize; i++) {
+		for (int j = 0; j < ySize; j++) {
+			input[j*xSize + i] = (sqrtf(input[j*xSize+i]* input[j*xSize + i]+ copyInput[j*xSize + i]* copyInput[j*xSize + i])>=threshold) ? 255 : 0;
+		}
+	}
+
+}
+
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+**
+prvo vrsi sukcesivno filtriranje upotrebom NF filtra, a potom detekciju ivica
+**
+
+void performNFplusSobelEdgeDetection(uchar input[], int xSize, int ySize, int stages, uchar threshold)
+{
+	//TO DO
+	performSuccessiveNFFilter(input, xSize, ySize, stages);
+	performSobelEdgeDetection(input, xSize, ySize, threshold);
+}
+
+
+****************************************************
+****************************************************
+----------------------VEZBA7----------------------**
+---Histogram i poboljsanje kontrasta u slici------**  
+****************************************************
+****************************************************
+
+
+{simpleContrastImprovement , calculateHistogram, equalizeHistogram, modifySaturation}
+
+
+**
+Histogram slike predstavlja frekvenciju pojavljivanja razlicitih nivoa osvetljaja. Histogram slike pomaze
+prilikom odredjivanja praga kod algoritama za detekciju objekata unutar slike.
+**
+
+
+**
+vrsi skaliranje vrednosti piksela na pun opseg 0-255. Nalazi se minimalna vrednost piksela min, 
+maksimalna vrednost piksela max i zatim za svaki ulazni piksel racuna vrednost piksela po formuli
+**
+
+
+void simpleContrastImprovement (const uchar input[], int xSize, int ySize, uchar output[])
+{
+	/* TODO */
+	uchar min = input[0];
+	uchar max = input[0];
+
+	for (int j = 0; j < ySize; j++) {
+		for (int i = 0; i < xSize; i++) {
+			if (input[j*xSize + i] > max) {
+				max = input[j*xSize + i];
+			}
+			if (input[j*xSize + i] < min) {
+				min = input[j*xSize + i];
+			}
+		}
+	}
+
+	for (int j = 0; j < ySize; j++) {
+		for (int i = 0; i < xSize; i++) {
+			output[j*xSize + i] = round((input[j*xSize + i] - min) * 255 / (max - min));
+		}
+	}
+
+}
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+**
+vrsi odredjivanje histograma slike. 
+**
+
+void calculateHistogram(const uchar input[], int xSize, int ySize, int histogram[])
+{
+	/* TODO */
+	for (int i = 0; i < 256; i++) {
+		histogram[i] = 0;
+	}
+
+	for (int j = 0; j < ySize; j++) {
+		for (int i = 0; i < xSize; i++) {
+			histogram[input[j*xSize + i]]++;
+		}
+	}
+
+}
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+**
+vrsi poboljsanje kontrasta u slici koriscenjem algoritma za ujednacavanje histograma slike.Ujednacavanje 
+histograma je metod obrade slike kojom e podesava kontrast slike koriscenjem f-je odredjivanja histograma.
+Ovaj metod se najcesce koristi za povecanje globalnog kontrasta u slici, narocito ukoliko slika sadrzi piksele 
+pribliznih vrednosti. Ujednacavanje histograma podrazumeva da oblasti nizeg kontrasta u slici dobiju
+veci kontrast tako sto se rasprostiru vrednosti piksela koje se nacesce javljaju. Ujednacavanje histograma 
+rezultuje pojavom da tamni pikseli u slici izgledaju jos tamniji a svetli jos svetliji. Operacija
+ujednacavanja histograma se ne vrsi nad samim histogramom. Za razliku od transformacije slike 
+u spekralni domen, gde je vrsena transformacija slike, obrada u spektralnom domenu pa rekonstrukcija
+slike, u slucaju histograma vrsi se izracunavanje histograma ulazne slike, a zatim na osnovu tog histograma
+i samih vrednosti ulazne slike vrsi izracunavanje vrednosti slike koja ce imati poboljsan histogram. Ovaj algoritam 
+se primenjuje nad Y komponentom. Prvo vrsimo konverziju iz RGB u YUV prostor boja, racunamo histogram, cdf.
+Prolazimo kroz citavu ulaznu sliku i za svaki piksel racunamo izlazni piksel koristeci njegovu vrednost i vrednost
+f-je raspodele formulom. 
+
+~ L - maksimalna moguca vrednost piksela
+~ cdf - kumulativna f-ja raspodele za zadati histogram
+**
+
+void equalizeHistogram(const uchar input[], int xSize, int ySize, uchar output[], uchar L)
+{
+	/* TODO */
+	int histogram[256], cdf[256];
+	int sum = 0, cdfmin;
+
+	calculateHistogram(input, xSize, ySize, histogram);
+	for (int i = 0; i < 256; i++) {
+		sum += histogram[i];
+		cdf[i] = sum;
+	}
+
+	int k = 0;
+	while (cdf[k] == 0) {
+		k++;
+	}
+	cdfmin = cdf[k];
+
+	for (int j = 0; j < ySize; j++) {
+		for (int i = 0; i < xSize; i++) {
+			output[j*xSize + i] = round((cdf[input[j*xSize + i]] - cdfmin)*L / (xSize*ySize - cdfmin));
+		}
+	}
+
+}
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+**
+realizuje podesavanje nivoa zasicenja boje u slici. Podrazumevamo promenu nivoa boje u svakom od piksela
+bez promene ukupnog osvetljaja tog piksela. 
+
+
+~ S - nivo zasicenja ?[0.0, 2.0]; vrednost 0 odgovara slici bez boja (monohromatska slika), 1.0 originalnim
+	vrednostima boja a 2.0 maksimalnoj saturaciji
+**
+
+static uchar clip(double x) {
+	if (x < 0) {
+		x = 0;
+	}
+	if (x > 255) {
+		x = 255;
+	}
+
+	return uchar(x);
+}
+
+
+void modifySaturation(const uchar inputRGB[], const uchar inputY[], int xSize, int ySize, uchar outputRGB[], double S)
+{
+	/* TODO */
+	for (int j = 0; j < ySize; j++) {
+		for (int i = 0; i < xSize; i++) {
+			outputRGB[j*xSize * 3 + i * 3] = clip(inputRGB[j*xSize * 3 + i * 3] * S + inputY[j*xSize + i] * (1 - S));
+			outputRGB[j*xSize * 3 + i * 3 + 1] = clip(inputRGB[j*xSize * 3 + i * 3 + 1] * S + inputY[j*xSize + i] * (1 - S));
+			outputRGB[j*xSize * 3 + i * 3 + 2] = clip(inputRGB[j*xSize * 3 + i * 3 + 2] * S + inputY[j*xSize + i] * (1 - S));
+		}
+	}
+}
+
+
+
+
+
+****************************************************
+****************************************************
+----------------------VEZBA8----------------------**
+---Potiskivanje suma u slici----------------------**  
+****************************************************
+****************************************************
+
+{performMovingAverage, performGaussFilter, calculateGaussKernel, performMedianFilter}
+
+
+** 
+Filtriranje slike upotrebom NF filtara pokazao se kao neefikasan u slucaju potiskivanja impulsnog suma.
+Oni uspevaju samo da umanje intenzitet impulsnog suma ali ne i da ga u potpunosti otklone.
+**
+
+**
+Vrsi filtriranje upotrebom filtra usrednjivaca upotrebom kernela dimenzija NxN. Ovaj algoritam se zasniva na
+cinjenici da se vecina korisnog signala nalazi u niskom delu spekra. Iz tog razloga filtriranje upotrebom NF 
+filtra eliminise signal greske koji se nalazi u visokom delu spektra. Nedostatak ovog pristupa jeste 
+sto se gube detalji slike koji se nalze u visokom delu spektra i dolazi do zamucenja.
+**
+
+void performMovingAverage (uchar input[], int xSize, int ySize, int N)
+{
+	//TO DO
+	double *filterCoeff = new double[N*N];
+	for (int i = 0; i < N*N; i++) {
+		filterCoeff[i] = 1.0 / (N*N);
+	}
+
+	convolve2D(input, xSize, ySize, filterCoeff, N);
+
+}
+
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+**
+Vrsi filtriranje upotrebom Gausovog filtra. Parametar sigma predstavlja varijansu raspodele. Takodje je NF filter.
+Takodje dolazi do zamucenja.
+
+**
+
+void performGaussFilter (uchar input[], int xSize, int ySize, int N, double sigma)
+{
+	//TO DO
+	double *kernelCoeff = new double[N*N];
+	for (int i = 0; i < N*N; i++) {
+		kernelCoeff[i] = 0;
+	}
+
+	calculateGaussKernel(kernelCoeff, N, sigma);
+
+	convolve2D(input, xSize, ySize, kernelCoeff, N);
+}
+
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+void calculateGaussKernel(double kernel[], int N, double sigma)
+{
+	double C = 0;
+	for(int n = 0; n < N; n++)
+    {
+        for(int k = 0; k < N; k++)
+        {
+            kernel[n*N+k] = exp( -((n - N/2)*(n - N/2) + (k - N/2)*(k - N/2)) / (2 * sigma * sigma));
+			C += kernel[n*N+k];
+		}
+	}
+
+	C = 1.0 / C;
+
+	for(int n = 0; n < N; n++)
+    {
+        for(int k = 0; k < N; k++)
+        {
+            kernel[n*N+k] *= C;
+		}
+	}
+}
+
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+**
+vrsi obradu slike upotrebom Median algoritma. Prvo se vrsi prosirenje slike pre blokovske obrade.
+Znacajno efikasnije potiskivanje impulsnog suma se postize ovim algoritmom (nelinearna obrada). 
+Ideja se bazira na cinjenici da svaki pojedinacni impuls suma znacajno odstupa od okolnih vrednosti
+u orifinalnoj slici, one su uvek grupisane uz sporiju promenu. 
+**
+
+
+void performMedianFilter (uchar input[], int xSize, int ySize, int N)
+{
+	//TO DO
+
+	uchar* extended = new uchar[(xSize + N - 1) * (ySize + N - 1)];
+
+	extendBorders(input, xSize, ySize, extended, N / 2);
+
+	for (int h = 0; h < ySize; h++)
+	{
+		for (int v = 0; v < xSize; v++)
+		{
+			double *buffer = new double[N * N];
+
+			for (int k = 0; k <N; k++)
+			{
+				for (int n = 0; n <N; n++)
+				{
+					buffer[k*N + n] = extended[(h+k)*(xSize+N-1)+v+n];
+				}
+			}
+
+			bubble_sort(buffer, N * N);
+
+			input[h*xSize + v] = buffer[(N*N-1)/2];
+
+			delete buffer;
+		}
+	}
+
+	delete extended;
+}
+
+void bubble_sort(double buffer[], int size) {
+	int i, j;
+	bool swapped;
+	for (int i = 0; i < size - 1; i++) {
+		swapped = false;
+		for (int j = 0; j < size - i - 1; j++) {
+			if (buffer[j] > buffer[j + 1]) {
+				int tmp = buffer[j];
+				buffer[j] = buffer[j + 1];
+				buffer[j + 1] = tmp;
+				swapped = true;
+			}
+		}
+		if (swapped == false) break;
+	}
+}
+
+
+****************************************************
+****************************************************
+----------------------VEZBA9----------------------**
+---Implementacija algoritma za interpolaciju slike**  
+****************************************************
+****************************************************
+
+{sampleAndHold, bilinearInterpolate, imageRotate}
+
+**
+Cilj je implementacija metoda za interpolciju slike pri proizvoljnom fakstoru uvecanja ili umanjenja
+uz ocuvanje ostrine. 
+**
+
+**
+vrsi skaliranje slike, velicina izlazne slike racuna se na osnovu dimenzija ulazne slike i faktora skaliranje.
+
+
+~ input - ulazna slika u RGB formatu
+~ xSize - horizontalna dimenzija ulazne slike u pikselima
+~ ySize – vertikalna dimenzija ulazne slike u pikselima
+~ output – izlazna slika u RGB formatu
+~ newXSize – horizontalna dimenzija izlazne slike u pikselima
+~ newYSize – vertikalna dimenzija izlazne slike u pikselima
+
+**
+
+int clip(int x, int maks) {
+	if (x < 0) {
+		return 0;
+	}
+	if (x > maks) {
+		return maks;
+	}
+
+	return x;
+}
+
+void sampleAndHold(const uchar input[], int xSize, int ySize, uchar output[], int newXSize, int newYSize)
+{
+	/* TO DO */
+	double Fi = (double)newXSize / xSize;
+	double Fj = (double)newYSize / ySize;
+
+	for (int i = 0; i < newXSize; i++) {
+		for (int j = 0; j < newYSize; j++) {
+			int i1 = clip((i - Fi / 2) / Fi + 1,xSize);
+			int j1 = clip((j - Fj / 2) / Fj + 1,ySize);
+
+			for (int k = 0; k < 3; k++) {
+				output[j*newXSize*3 + i*3+k] = input[j1*xSize*3 + i1*3+k];
+			}
+
+		}
+	}
+
+}
+
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+**
+vrsi bilinearnu interpolaciju slike, obrada nad slikom se vrsi u RGB formatu. Koef interpolacije racunaju se
+na osnovu udaljenosti tacaka iz osnovnog rastera od interpolacione tacke. Osnovna ideja je da se prvo izvede
+linearna interpolacija po jednoj dimenziji slike, a potom po drugoj. Za razliku od sampleAndHold tehnike 
+bilinerna interpolacija koristi 4 najblize vrednosti tacaka, locirane u dijagonalnim pravcima od trenutnog piksela.
+bilinearna interpolacija koristi oblast 2x2 poznatih vrednosti piksela koji  okruzuju nepoznati piksel. Zasniva
+se na usrednjavanju te 4 vrednosti po formuli.
+
+~ input – ulazna slika u RGB formatu
+~ xSize – horizontalna dimenzija ulazne slike u pikselima
+~ ySize – vertikalna dimenzija ulazne slike u pikselima
+~ output – izlazna slika u RGB formatu
+~ newXSize – horizontalna dimenzija izlazne slike u pikselima
+~ newYSize – vertikalna dimenzija izlazne slike u pikselima
+
+**
+
+void bilinearInterpolate(const uchar input[], int xSize, int ySize, uchar output[], int newXSize, int newYSize)
+{
+	/* TO DO */
+	double Fi = (double)newXSize / xSize;
+	double Fj = (double)newYSize / ySize;
+
+	for (int i = 0; i < newXSize; i++) {
+		for (int j = 0; j < newYSize; j++) {
+			
+			double a = (double)i / Fi - floor((double)i / Fi);
+			double b = (double)j / Fj - floor((double)j / Fj);
+
+			int i1 = floor(i / Fi);
+			int j1 = floor(j / Fj);
+
+			for (int k = 0; k < 3; k++) {
+				uchar pixel00 = input[j1*xSize * 3 + i1 * 3 + k];
+				uchar pixel01 = input[j1*xSize * 3 + (i1+1) * 3 + k];
+				uchar pixel10 = input[(j1+1)*xSize * 3 + i1 * 3 + k];
+				uchar pixel11 = input[(j1+1)*xSize * 3 + (i1+1) * 3 + k];
+
+				output[j*newXSize * 3 + i * 3 + k] = (1 - a)*(1 - b)*pixel00 + (1 - a)*b*pixel10 + a*(1 - b)*pixel01 + a*b*pixel11;
+			}
+
+		}
+	}
+
+}
+
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+**
+vrsi rotaciju slike oko tacke sa koordinatama (m, n) za ugao angle. Izlazna slika je istih dimenzija.
+Za odredjivanje vrednosti piksela za koje izracunate koordinate u originalnoj slici ne predstavljaju 
+ceo broj koristi se Sample and Hold algoritam interpolacije
+** 
+
+void imageRotate(const uchar input[], int xSize, int ySize, uchar output[], int m, int n, double angle)
+{
+	/* TO DO */
+
+	double angle1 = angle / 180 * 3.14159;
+
+	for (int i = 0; i < xSize; i++) {
+		for (int j = 0; j < ySize; j++) {
+			int i1 = i*cos(angle1) - j*sin(angle1) - m*cos(angle1) + n*sin(angle1) + m;
+			int j1 = j*cos(angle1) + i*sin(angle1) - m*sin(angle1) - n*cos(angle1) + n;
+
+			for (int k = 0; k < 3; k++) {
+				output[j*xSize * 3 + i * 3 + k] = input[j1*xSize * 3 + i1 * 3 + k];
+			}
+
+		}
+	}
+}
+
+
+
+****************************************************
+****************************************************
+----------------------VEZBA10---------------------**
+---Pronalazenje objekata u slici------------------**  
+****************************************************
+****************************************************
+
+{SIFTDetect, l2Distance, matchFeatures, SIFTDetectPlusMatch, HarrisCornerDetection}
+
+
+
+**
+vrsi pronalazenje obelezja slike koristeci SIFT algoritam
+
+~ input – ulazna slika u RGB formatu
+~ xSize – horizontalna dimenzija ulazne slike u pikselima
+~ ySize – vertikalna dimenzija ulazne slike u pikselima
+
+**
+
+void SIFTDetect(uchar input[], int xSize, int ySize)
+{
+	SiftKeypointList kptList;
+
+	/* Convert input image to YUV420 image */
+	/* TO DO*/
+	uchar* Y_buff = new uchar[xSize*ySize];
+	char* U_buff = new char[xSize*ySize/4];
+	char* V_buff = new char[xSize*ySize/4];
+
+	RGBtoYUV420(input, xSize, ySize, Y_buff, U_buff, V_buff);
+
+	/* Perform SIFT transformation  */
+	/* TO DO*/
+
+	kptList = calculateSIFT(Y_buff, xSize, ySize);
+
+	/* Mark all keypoints in input image */
+	/* TO DO*/
+	uchar R = 0, G=0, B=0;
+	markSIFTKeypointsRGB(input, xSize, ySize, kptList, R, G, B);
+
+	delete[] Y_buff;
+	delete[] U_buff;
+	delete[] V_buff;
+}
+
+
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+**
+racuna euklidsku razdaljinu izmedju dva deskriptora koji odgovaraju tackama kp1 i kp2.
+Duzina deskriptora je definisana konstantom DEGREE_OF_DESCRIPTORS. Prolazimo kroz listu
+tacaka pronadjenih u jednoj slici i za svaku tacku proci kroz listu tacaka pronadjenih u drugoj
+slici i racunamo eklidsku udaljenost izmedju deskriptora te dve tacke
+
+**
+
+double l2Distance(SiftKeypoint kp1, SiftKeypoint kp2)
+{
+	/* TO DO */
+	float sum = 0;
+	for (int i = 0; i < DEGREE_OF_DESCRIPTORS; i++) {
+		sum += pow(kp1.descriptors[i] - kp2.descriptors[i], 2);
+	}
+
+	return sqrt(sum);
+}
+
+
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+**
+~ leftImageKP – Lista obeležja pronaðenih u levoj slici
+~ rightImageKP – Lista obeležja pronaðena u desnoj slici
+~ matchPairs – Lista ureðenih parova taèaka koje za koje je utvrdjeno da odgovaraju jedna drugoj
+~ threshold - – Maksimalna euklidska udaljenost dve zaèke za koje važi da odgovaraju jedna drugoj
+**
+
+
+void matchFeatures(SiftKeypointList leftImageKP, SiftKeypointList rightImageKP, list<pair<QPoint, QPoint>>& matchPairs, double threshold)
+{
+	/* TO DO */
+	for (SiftKeypoint kl : leftImageKP) {
+		for (SiftKeypoint kr : rightImageKP) {
+			if (l2Distance(kl, kr) < threshold) {
+				matchPairs.push_back(pair<QPoint, QPoint>(QPoint(kl.r, kl.c), QPoint(kr.r, kr.c)));
+			}
+		}
+	}
+}
+
+
+
+
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
+**
+vrsi racunanje SIFT obelezja za ulaznu sliku. Tacke se dele u dva skupa, one koje odgovaraju
+levoj polovini slike(levoj slici) i one koje odgovaraju desnoj polovini slike(desnoj slici)
+koristeci f-ju splitFeatures. Nakon toga poziva se fun-ja za trazenje podudarajucih obelezja 
+matchFeatures). za svaki uredjen par izmedju dva obelezja potrebno je u ulaznoj slici(RGB)
+isctati liniju koja ih povezuje. To se moze izvrsiti pozivom f-je drawMatchedFeaturesLinesRGB
+**
+
+void SIFTDetectPlusMatch(uchar input[], int xSize, int ySize, double threshold)
+{
+	SiftKeypointList kptList, kptListLeft, kptListRight;
+
+	uchar* Y_buff = new uchar[xSize*ySize];
+	char* U_buff = new char[xSize*ySize / 4];
+	char* V_buff = new char[xSize*ySize / 4];
+
+	/* Convert input image to YUV420 image */
+	/* TO DO */
+	RGBtoYUV420(input, xSize, ySize, Y_buff, U_buff, V_buff);
+
+	/* Perform SIFT transformation  */
+	/* TO DO */
+	kptList = calculateSIFT(Y_buff, xSize, ySize);
+
+	/* Split the features of left and right images in separate lists */
+	/* TO DO */
+	splitFeatures(kptList, xSize, kptListLeft, kptListRight);
+
+	/* Match the features from two images */
+	list<pair<QPoint, QPoint>> matchedDots;
+	matchFeatures(kptListLeft, kptListRight, matchedDots, threshold);
+
+	/* Draw a line for each mached feature pair */
+	/* TO DO */
+	drawMatchedFeaturesLinesRGB(input, xSize, ySize, matchedDots, 0, 255, 0);
+
+	delete[] Y_buff;
+	delete[] U_buff;
+	delete[] V_buff;
+
+}
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+**
+vrsi detekciju uglova u slici upotrebom Harisovog algoritma. Prvi korak je konverzija
+iz RGB u YUV prostor boja. Detekcija se radi nad Y komponentom. Nakon toga pravi se kopija
+Y komponente za potrebe filtriranja horizontalnim i vertikalnim Sobel operatorom. Jednu sliku
+filtriramo koristeci horizontalni operator a drugu koristeci vertikalni operator. Nakon toga,
+za svaki piskel u slici jposmatramo okruzenje oko piksela i racunamo tezinsku matricu M. 
+Nakon racunanja M racunamo vrednost fakstora R(trace - zbir elemenata na glavnoj dijagonali).
+Koef alfa predstavlja emirijski odredjenu konstantu i iznosi 0.5. Prolazimo kroz matricu R
+i za svaku vrednost R(i, j) koja prelazi granicu threshold proveravamo dali predstavlja
+lokalni maskimum za blok okolnih piskela dimanzija 3x3. Ukoliko predstavlja, bojimo u zeleno sve 
+iksele ulazne slike koji se nalaze unutar bloka dimenzija 3x3 oko tacke sa koordinatama (i, j)
+**
+
+
+void HarisCornerDetection(uchar input[], int xSize, int ySize, double threshold)
+{
+	uchar* sobelVertical = new uchar[xSize*ySize];
+	uchar* sobelHorizontal = new uchar[xSize*ySize];
+	char* U_buff = new char[xSize*ySize / 4];
+	char* V_buff = new char[xSize*ySize / 4];
+
+	/* Convert input image to YUV420 image */
+	RGBtoYUV420(input, xSize, ySize, sobelVertical, U_buff, V_buff);
+	
+	/* Create a copy of Y component, since it is needed to calculate derivative in both axis */
+	memcpy(sobelHorizontal, sobelVertical, xSize*ySize);
+
+	/* Filter both images with corresponding Sobel operator */
+	/* TO DO: */
+	double filterCoeff1[] = { -1.0 / 4,0,1.0 / 4,-2.0 / 4,0,2.0 / 4,-1.0 / 4,0,1.0 / 4 };
+	double filterCoeff2[] = { -1.0 / 4,-2.0 / 4,-1.0 / 4,0,0,0,1.0 / 4,2.0 / 4,1.0 / 4 };
+
+	convolve2D(sobelVertical, xSize, ySize, filterCoeff1, 3);
+	convolve2D(sobelHorizontal, xSize, ySize, filterCoeff2, 3);
+
+	/* For each pixel, calculate the matrix M, then calculate the R factor and place it in new matrix */
+	/* Constant alpha is 0.05. */
+	/* TO DO: */
+	int delta = 1;
+
+	int newXSize = xSize + 2 * delta;
+	int newYSize = ySize + 2 * delta;
+
+	uchar* M = new uchar[4];
+	double* R = new double[xSize*ySize];
+
+	double alpha = 0.05;
+
+	for (int i = 0; i < xSize; i++) {
+		for (int j = 0; j < ySize; j++) {
+			M[0] = sobelHorizontal[j*xSize + i] * sobelHorizontal[j*xSize + i];
+			M[1] = sobelHorizontal[j*xSize + i] * sobelVertical[j*xSize + i];
+			M[2] = M[1];
+			M[3] = sobelVertical[j*xSize + i] * sobelVertical[j*xSize + i];
+			R[j*xSize + i] = M[0] * M[3] - M[1] * M[2] - alpha*pow(M[0] + M[3], 2);
+		}
+	}
+
+	/* For each entry in R matrix, if the value is greater then threshold, check the 3x3 block arround the pixel
+	/* and if it is local maximum, colour the entire 3x3 blok in the input image in blue */
+
+	for (int i = 0; i < xSize; i++) {
+		for (int j = 0; j < ySize; j++) {
+			if (R[j*xSize + i] > (threshold*10)) {
+				input[j*xSize * 3 + i * 3] = 0;
+				input[j*xSize * 3 + i * 3 + 1] = 255;
+				input[j*xSize * 3 + i * 3 + 2] = 0;
+			}
+		}
+	}
+
+	delete[] sobelVertical;
+	delete[] sobelHorizontal;
+	delete[] U_buff;
+	delete[] V_buff;
+
+}
+
+
+****************************************************
+****************************************************
+----------------------VEZBA11---------------------**
+---Segmentacija slike upotrebom masinskog ucenja--**  
+****************************************************
+****************************************************
+
+{kMeans, IntensityPlusPositionBasedKMeans, ColorPlusPositionBasedKMeans, SIFTBasedKMeans}
+
+
+
+**
+vrsi grupisanje tacka u N-dimenzionom prostoru koristeci K-means algoritam. Inicijalizujemo K
+centralnih tacaka u N-dimenzionom prostoru za zadati broj grupa K. Svaku tacku pridruzujemo grupi(klasteru)
+cija centralna tacka je najbliza zadatoj tacki. Pronalazimo novu centralnu tacku za svaki slaster tako sto 
+racunamo aritmeticku sredinu svih tacaka u klasteru. Ponavljamo proces dokle god barem jedna centralna tacka
+menja svoju poziciju
+
+~ points – vektor ulaznih taèaka
+~ nFeatures – broj obeležja kojima je opisana taèka
+~ K – broj grupa (klastera)
+
+**
+
+static vector<vector<int>> kMeans(vector<KMeansPoint> points, int nFeatures, int K) {
+	// Total number of points
+	int nSamples = points.size();
+	
+	// Randomize initial centroids
+	vector<KMeansPoint> centroids;
+	for (int k = 0; k < K; k++) 
+	{
+		int rand_int = rand() % nSamples;
+		centroids.push_back(points[rand_int]);
+	}
+	
+	// Create empty vector for each cluster
+	vector<vector<int> > cluster;
+	for (int k = 0; k < K; k++) {
+		vector<int> vectemp;
+		cluster.push_back(vectemp);
+	}
+	
+	// Iteration counter
+	int counter = 0;
+	
+	// Iteratively find better centroids
+	while (1) {
+
+		// Clear each cluster
+		for (int k = 0; k < K; k++)
+		{
+			cluster[k].clear();
+		}
+		
+		// Set convergence flag to TRUE
+		bool converge = true;
+		
+		// For every sample, find which cluster it belongs to,
+		// By comparing the distance between it and each clusters' centroid.
+		// TO DO
+		for (int k = 0; k < nSamples; k++) {
+			cluster[whichIsNearest(centroids, points[k])].push_back(k);
+		}
+
+		// For each cluster, re-calculate its centroid.
+		for (int k = 0; k < K; k++) {
+			int clusterSize = cluster[k].size();
+			
+			vector<double> vectemp = vector<double>(nFeatures, 0);
+			for (int i = 0; i < clusterSize; i++) {
+				for(int j = 0; j < nFeatures; j++)
+					vectemp[j] = vectemp[j] + points[cluster[k][i]].feature[j] / (double)clusterSize;
+			}
+			// If centroid position changed set convergence flag to false
+			// TO DO
+			if (getDistance(vectemp, centroids[k].feature) > CONVERGENCE_THRESHOLD) {
+				converge = false;
+			}
+
+			centroids[k].feature = vectemp;
+
+		}
+
+		// If convergence achieved break the loop
+		if (converge) 
+			break;
+		++counter;
+	}
+	
+	// Return cluster vectors
+	return cluster;
+}
+
+
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+**
+vrsi grupisanje piksela u slici na osnovu nivoa osvetljaja i polozaja. Vrsi se konverzija iz RGB
+u YUV prostor boja. Potom pravimo vektor tacaka(tipa KMeansPoint) koji za svaku tacku sadrzi opis
+u formi [osvetljaj, horizontalni polozaj, vertikalni polozaj]. Sva tri obelezja je potrebno skalirati
+tako da se vrenosti nalaze u istom opsegu. Potom se poziva f-ja kMeans kako bi se izvsila segmentacija.
+Svaki dobijeni segmet bojimo razlicitom bojom.
+
+~ input – Ulazna slika u RGB formatu
+~ xSize – širina slike
+~ ySize – visina slike
+~ K –Zadati broj grupa (klastera)
+
+**
+
+void IntensityPlusPositionBasedKMeans(uchar input[], int xSize, int ySize, int K) 
+{
+	//TO DO
+	uchar *Y_buff = new uchar[xSize*ySize];
+	char *U_buff = new char[xSize*ySize / 4];
+	char *V_buff = new char[xSize*ySize / 4];
+
+	RGBtoYUV420(input, xSize, ySize, Y_buff, U_buff, V_buff);
+
+	vector<KMeansPoint> points;
+
+	vector<double> features;
+
+	for (int i = 0; i < xSize; i++) {
+		for (int j = 0; j < ySize; j++) {
+			features.clear();
+			features.push_back(Y_buff[j*xSize + i]);
+			features.push_back(i * 255 / xSize);
+			features.push_back(j * 255 / ySize);
+			KMeansPoint newPoint = { i, j };
+			newPoint.feature = features;
+			points.push_back(newPoint);
+		}
+	}
+
+	vector<vector<int>> clusters;
+	clusters = kMeans(points, 3, K);
+
+	// Paint each segment using predefined colors
+	for (int k = 0; k < K; k++)
+	{
+		for (int index : clusters[k])
+		{
+			int i = points[index].x;
+			int j = points[index].y;
+			input[3 * j * xSize + 3 * i] = RGBColors[k][0];
+			input[3 * j * xSize + 3 * i + 1] = RGBColors[k][1];
+			input[3 * j * xSize + 3 * i + 2] = RGBColors[k][2];
+		}
+	}
+	
+}
+
+
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+**
+vrsi grupisanje piksela u slici na osnovu boje i polozaja. Prvimo vektor tacaka(tipa KMensPoint)
+koji za svaku tacku sadrzi opis u formi [nivo crvene, nivo zelene, nivo plave, 
+horizontalni polozaj, vertikalni polozaj]. Svih pet obelezja skaliramo tako da se vrednosti
+nalaze u istom opsegu. Potom pozivamo f-ju kMeans kako bi se izvrsila segmetacija. Svaki
+dobije segment bojimo razlicitom bojom
+
+~ input – Ulazna slika u RGB formatu
+~ xSize – širina slike
+~ ySize – visina slike
+~ K –Zadati broj grupa (klastera)
+
+**
+
+
+
+
+void ColorPlusPositionBasedKMeans(uchar input[], int xSize, int ySize, int K) 
+{
+	// TO DO
+	vector<KMeansPoint> points;
+
+	vector<double> features;
+
+	for (int i = 0; i < xSize; i++) {
+		for (int j = 0; j < ySize; j++) {
+			features.clear();
+			features.push_back(input[j*xSize*3 + i*3]);
+			features.push_back(input[j*xSize * 3 + i * 3 + 1]);
+			features.push_back(input[j*xSize * 3 + i * 3 + 2]);
+			features.push_back(i * 255 / xSize);
+			features.push_back(j * 255 / ySize);
+			KMeansPoint newPoint = { i, j };
+			newPoint.feature = features;
+			points.push_back(newPoint);
+		}
+	}
+
+	vector<vector<int>> clusters;
+	clusters = kMeans(points, 3, K);
+
+	// Paint each segment using predefined colors
+	for (int k = 0; k < K; k++)
+	{
+		for (int index : clusters[k])
+		{
+			int i = points[index].x;
+			int j = points[index].y;
+			input[3 * j * xSize + 3 * i] = RGBColors[k][0];
+			input[3 * j * xSize + 3 * i + 1] = RGBColors[k][1];
+			input[3 * j * xSize + 3 * i + 2] = RGBColors[k][2];
+		}
+	}
+}
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+**
+vrsi racunanje SIFT obelezja, potom grupisanje obelezja koristeci kMeans algoritam
+**
+
+
+void SIFTBasedKMeans(uchar input[], int xSize, int ySize, int K) 
+{
+	// TO DO
+	uchar *Y_buff = new uchar[xSize*ySize];
+	char *U_buff = new char[xSize*ySize / 4];
+	char *V_buff = new char[xSize*ySize / 4];
+
+	RGBtoYUV420(input, xSize, ySize, Y_buff, U_buff, V_buff);
+
+	SiftKeypointList keyList = calculateSIFT(Y_buff, xSize, ySize);
+
+
+}
+
+
+****************************************************
+****************************************************
+----------------------VEZBA12---------------------**
+---Klasifikacija sadrzaja slike-------------------**  
+****************************************************
+****************************************************
+
+{getBoWDescripton, trainSVM, predictSingleImage}
+
+
+
+**
+vrsi racunanje vektora obelezja na osnovu prosledjenog modela skupa reci(bag of words).
+Za prosledjenu sliku input pronalazimo kljucne tacke SIFT algoritmom.Za svaku tacku 
+pronalazimo kojem klasteru pripada iz prosledjenog BoW modela. Tacka pripada onom klasteru
+za koji je udaljenost do centra klastera najmanja. Uvecavamo polje u histogramu
+koje odgovara indeksu klastera za 1. Normalizujemo vrednosti tako sto cemo svako
+polje unutar histograma podeliti zbirom svih elemenata u histogramu.
+
+ 
+~ input – ulazna slika u RGB formatu
+~ xSize – horizontalna dimenzija slike
+~ ySize – vertikalna dimenzija slike
+~ model – BoW model (sadrži velièinu modela, velièinu svakog vektora)
+
+**
+
+
+
+vector<double> getBoWDescripton(uchar input[], int xSize, int ySize, const BagOfWordsModel& model)
+{
+	vector<double> histogram(model.numOfClusters, 0);
+	
+	/* TO DO: Calculate SIFT features for input image */
+	SiftKeypointList features = GetSIFTFeatures(input, xSize, ySize);
+	
+	/* TO DO: Create histogram of features based on model */
+	for (SiftKeypoint &keys : features) {
+		vector<double> descriptor(keys.descriptors, keys.descriptors + DEGREE_OF_DESCRIPTORS);
+		histogram[whichIsNearest(model.model, descriptor)]++;
+	}
+
+	/* Scale histogram to [-1.0, 1.0]*/
+	double sum = 0;
+	for (double i : histogram) {
+		sum += i;
+	}
+
+	for (int i = 0; i < model.numOfClusters; i++) {
+		histogram[i] /= sum;
+	}
+
+	return histogram;
+}
+
+
+
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+**
+vrsi obuku SVM modela za klasifikaciju sadrazaja slike u prosledjenoj bazi podataka. 
+Funkcija TrainSVM u prvoj fazi priprema ulaz za SVM u formi strukture svm_problem. 
+Parametri SVM su dati u fromi strukture svm_param. Funkcija koja vrši postavljanje 
+parametara na podrazumevane vrednosti naziva se setDefaultParams i u njoj je moguæe praviti izmene parametara.
+Nakon toga vrši se pravljenje novog ili uèitavanje BoW modela iz datoteke. Koristeæi dobijeni 
+model racunamo vektor obeležja koristeæi funkciju getBoWDescripton. 
+Vektor obeležja se potom zajedno sa rednim brojem klase dodaje u strukturu svmProblemSet
+
+~ dataBase – Baza slika nad kojom je potrebno uraditi obuku
+~ createNewBoWModel – Naznaka da li je potrebno praviti novi BoW model ili uèitati postojeæi iz datoteke.
+
+**
+
+
+void trainSVM(const ImgDataBase& dataBase, bool createNewBoWModel)
+{
+	svm_problem svmProblemSet;
+	svm_parameter svmParam;
+
+	/* Create problem set */
+	svmProblemSet.l = dataBase.size();
+	svmProblemSet.y = new double[svmProblemSet.l];
+	svmProblemSet.x = new svm_node* [svmProblemSet.l];
+
+	/* Load SVM params */
+	setDefaultParams(svmParam);
+	BagOfWordsModel bowModel;
+	if (createNewBoWModel)
+	{
+		cout << "Making Bag of Words model ...";
+		bowModel = createBoWModel(dataBase, histogramSize);
+		cout << "DONE" << endl;
+	}
+	else
+	{
+		cout << "Load Bag of Words model ...";
+		loadBoWModel(bowModel, "model.bow");
+		cout << "DONE" << endl;
+	}
+
+	cout << "Calculating features for SVM...";
+	int i = 0;
+	for (const DBImage& img : dataBase)
+	{
+		vector<double> feature;
+		/*************************************************************************/
+		/* TO DO Calculate BoW descriptor for image and put it in feature vector */
+		
+		feature = getBoWDescripton(img.image->bits(), img.image->width(), img.image->height(), bowModel);
+
+		/*************************************************************************/
+
+		svmProblemSet.y[i] = img.labelNumber;
+		svmProblemSet.x[i] = new svm_node[bowModel.featureVectorSize+1];
+		
+		for (int j = 0; j < bowModel.featureVectorSize; j++)
+		{
+			svmProblemSet.x[i][j] = { j, feature[j] };
+		}
+
+		svmProblemSet.x[i][bowModel.featureVectorSize] = { -1, 0.0 };
+		i++;
+	}
+
+	cout << "DONE" << endl;
+
+	cout << "Training SVM model ...";
+	
+	svm_model* model = NULL;
+	
+	/*************************************************************************/
+	/* TO DO: Invoke SVM train */
+
+	model = svm_train(&svmProblemSet, &svmParam);
+
+	/*************************************************************************/
+	cout << "DONE" << endl;
+
+	if(svm_save_model("vezba12.model", model))
+	{
+		cout <<"ERROR: can't save model to file";
+	}
+	
+	svm_free_and_destroy_model(&model);
+}
+
+
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+**
+koja vrši klasifikaciju jedne slike koriste’i prosle]eni BoW model i SVM model.
+Koristeæi prosleðeni BoW model za ulaznu sliku racunamo vektor obeležja
+koristeæi funkciju getBoWDescripton. Na osnovu vektora obeležja se priprema odgovarajuæi ulaz za SVM.
+Nakon toga poziva se funkciju svm_predict i prosledjuje joj se SVM model i 
+pripremeljeni ulazni vektor obeležja
+
+~ input – ulazna slika u RGB formatu
+~ xSize – horizontalna dimenzija slike
+~ ySize – vertikalna dimenzija slike
+~ bowModel – BoW model (sadrži velièinu modela, velièinu svakog vektora)
+~ svmModel – Unapred obuèen model SVM
+
+**
+
+
+int predictSingleImage(uchar input[], int xSize, int ySize, BagOfWordsModel& bowModel, svm_model* svmModel)
+{
+	vector<double> feature;
+	/*************************************************************************/
+	/* TO DO Calculate BoW descriptor for image and put it in feature vector */
+
+	feature = getBoWDescripton(input, xSize, ySize, bowModel);
+
+	/*************************************************************************/
+
+	svm_node* featureVector = new svm_node[bowModel.featureVectorSize + 1];
+	for (int j = 0; j < bowModel.featureVectorSize; j++)
+	{
+		featureVector[j] = { j, feature[j] };
+	}
+	featureVector[bowModel.featureVectorSize] = { -1, 0.0 };
+	/*************************************************************************/
+	/* TO DO: Invoke SVM train */
+	double res;
+
+	res = svm_predict(svmModel, featureVector);
+
+	/*************************************************************************/
+	
+	delete[] featureVector;
+
+	return round(res);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE imgdsp>
+<imgdsp>
+    <programs>
+        <program name="Color kMeans">
+            <params>
+              <param name="Cluster Num (K)" min="1" current="2" max="16"/>
+            </params>
+        </program>
+        <program name="Intensity+Position kMeans">
+            <params>
+              <param name="Cluster Num (K)" min="1" current="2" max="16"/>
+            </params>
+        </program>
+        <program name="Color+Position kMeans">
+            <params>
+              <param name="Cluster Num (K)" min="1" current="2" max="16"/>
+            </params>
+        </program>
+        <program name="SIFT kMeans">
+            <params>
+              <param name="Cluster Num (K)" min="1" current="2" max="16"/>
+            </params>
+        </program>
+    </programs>
+    <in_imgs>
+		<in_img file_name="baboon.bmp"/>
+		<in_img file_name="black_kitten_star.jpg"/>
+		<in_img file_name="black-white-kittens2.jpg"/>
+		<in_img file_name="cat_bed.jpg"/>
+		<in_img file_name="cat_grumpy.jpg"/>
+		<in_img file_name="cat-jumping-running-grass.jpg"/>
+		<in_img file_name="green_cat.jpg"/>
+		<in_img file_name="grey-cat-grass.jpg"/>
+		<in_img file_name="Image1.bmp"/>
+		<in_img file_name="image2.bmp"/>
+    </in_imgs>
+    <out_imgs>
+        <out_img file_name="processed_img.bmp"/>
+    </out_imgs>
+</imgdsp>
+
+
+
+
+
+
+
